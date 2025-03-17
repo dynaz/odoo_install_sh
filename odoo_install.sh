@@ -14,17 +14,17 @@
 # ./odoo-install
 ################################################################################
 
-OE_USER="odoo"
+OE_USER="odoo18"
 OE_HOME="/$OE_USER"
 OE_HOME_EXT="/$OE_USER/${OE_USER}-server"
 # The default port where this Odoo instance will run under (provided you use the command -c in the terminal)
 # Set to true if you want to install it, false if you don't need it or have it already installed.
 INSTALL_WKHTMLTOPDF="True"
 # Set the default Odoo port (you still have to use -c /etc/odoo-server.conf for example to use this.)
-OE_PORT="8069"
+OE_PORT="8018"
 # Choose the Odoo version which you want to install. For example: 16.0, 15.0, 14.0 or saas-22. When using 'master' the master version will be installed.
 # IMPORTANT! This script contains extra libraries that are specifically needed for Odoo 17.0
-OE_VERSION="17.0"
+OE_VERSION="18.0"
 # Set this to True if you want to install the Odoo enterprise version!
 IS_ENTERPRISE="False"
 # Installs postgreSQL V14 instead of defaults (e.g V12 for Ubuntu 20/22) - this improves performance
@@ -70,9 +70,9 @@ echo -e "\n---- Update Server ----"
 sudo add-apt-repository universe
 # libpng12-0 dependency for wkhtmltopdf for older Ubuntu versions
 sudo add-apt-repository "deb http://mirrors.kernel.org/ubuntu/ xenial main"
-sudo apt-get update
-sudo apt-get upgrade -y
-sudo apt-get install libpq-dev
+sudo apt update
+sudo apt upgrade -y
+sudo apt install libpq-dev
 
 #--------------------------------------------------
 # Install PostgreSQL Server
@@ -80,13 +80,13 @@ sudo apt-get install libpq-dev
 echo -e "\n---- Install PostgreSQL Server ----"
 if [ $INSTALL_POSTGRESQL_FOURTEEN = "True" ]; then
     echo -e "\n---- Installing postgreSQL V14 due to the user it's choise ----"
-    sudo curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
     sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-    sudo apt-get update
-    sudo apt-get install postgresql-16
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+    sudo apt update
+    sudo apt install postgresql-17
 else
     echo -e "\n---- Installing the default postgreSQL version based on Linux version ----"
-    sudo apt-get install postgresql postgresql-server-dev-all -y
+    sudo apt install postgresql postgresql-server-dev-all -y
 fi
 
 
@@ -97,14 +97,14 @@ sudo su - postgres -c "createuser -s $OE_USER" 2> /dev/null || true
 # Install Dependencies
 #--------------------------------------------------
 echo -e "\n--- Installing Python 3 + pip3 --"
-sudo apt-get install python3 python3-pip
-sudo apt-get install git python3-cffi build-essential wget python3-dev python3-venv python3-wheel libxslt-dev libzip-dev libldap2-dev libsasl2-dev python3-setuptools node-less libpng-dev libjpeg-dev gdebi -y
+sudo apt install python3 python3-pip
+sudo apt install git python3-cffi build-essential wget python3-dev python3-venv python3-wheel libxslt-dev libzip-dev libldap2-dev libsasl2-dev python3-setuptools node-less libpng-dev libjpeg-dev gdebi -y
 
 echo -e "\n---- Install python packages/requirements ----"
 sudo -H pip3 install -r https://github.com/odoo/odoo/raw/${OE_VERSION}/requirements.txt
 
 echo -e "\n---- Installing nodeJS NPM and rtlcss for LTR support ----"
-sudo apt-get install nodejs npm -y
+sudo apt install nodejs npm -y
 sudo npm install -g rtlcss
 
 #--------------------------------------------------
@@ -389,11 +389,11 @@ fi
 #--------------------------------------------------
 
 if [ $INSTALL_NGINX = "True" ] && [ $ENABLE_SSL = "True" ] && [ $ADMIN_EMAIL != "odoo@example.com" ]  && [ $WEBSITE_NAME != "_" ];then
-  sudo apt-get update -y
+  sudo apt update -y
   sudo apt install snapd -y
   sudo snap install core; snap refresh core
   sudo snap install --classic certbot
-  sudo apt-get install python3-certbot-nginx -y
+  sudo apt install python3-certbot-nginx -y
   sudo certbot --nginx -d $WEBSITE_NAME --noninteractive --agree-tos --email $ADMIN_EMAIL --redirect
   sudo service nginx reload
   echo "SSL/HTTPS is enabled!"
